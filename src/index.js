@@ -35,7 +35,7 @@ class Board extends React.Component {
 
     handleClick(i) {
         const squares = this.state.squares.slice();
-        squares[i] = 'X';
+        squares[i] = this.state.xIsNext ? 'X' : 'O'; /* Depending on the turn, X or O is placed */
         this.setState({
             squares: squares,
             xIsNext: !this.state.xIsNext, /* Flip's the value on update, so player turn can change */
