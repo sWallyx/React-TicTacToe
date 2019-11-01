@@ -7,11 +7,11 @@ import './index.css';
 
 function Square(props) {
     return (
-      <button className="square" onClick={props.onClick}>
-        {props.value}
-      </button>
+        <button className="square" onClick={props.onClick}>
+            {props.value}
+        </button>
     );
-  }
+}
 
 class Board extends React.Component {
 
@@ -21,6 +21,7 @@ class Board extends React.Component {
         /* Add a constructor to the Board and set the Board’s initial state to contain an array of 9 nulls corresponding to the 9 squares */
         this.state = {
             squares: Array(9).fill(null),
+            xIsNext: true, /* Turn control */
         };
 
         /* This later with info will look like this:
@@ -35,7 +36,10 @@ class Board extends React.Component {
     handleClick(i) {
         const squares = this.state.squares.slice();
         squares[i] = 'X';
-        this.setState({ squares: squares });
+        this.setState({
+            squares: squares,
+            xIsNext: !this.state.xIsNext, /* Flip's the value on update, so player turn can change */
+        });
     }
 
     renderSquare(i) {
@@ -44,7 +48,8 @@ class Board extends React.Component {
     }
 
     render() {
-        const status = 'Next player: X';
+        /* Text status with user control, on single line if */
+        const status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
 
         return (
             <div>
