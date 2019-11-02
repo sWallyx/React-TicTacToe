@@ -14,61 +14,17 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-
-    /* Add constructor */
-    constructor(props) {
-        super(props);
-        /* Add a constructor to the Board and set the Board’s initial state to contain an array of 9 nulls corresponding to the 9 squares */
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true, /* Turn control */
-        };
-
-        /* This later with info will look like this:
-        [
-            'O', null, 'X',
-            'X', 'X', 'O',
-            'O', null, null,
-        ]
-        */
-    }
-
-    handleClick(i) {
-        const squares = this.state.squares.slice();
-
-        /* Check if game ended or not more squares */
-        if (calculateWinner(squares) || squares[i]) {
-            /* Cancel handle */
-            return;
-        }
-        squares[i] = this.state.xIsNext ? 'X' : 'O'; /* Depending on the turn, X or O is placed */
-        this.setState({
-            squares: squares,
-            xIsNext: !this.state.xIsNext, /* Flip's the value on update, so player turn can change */
-        });
-    }
-
     renderSquare(i) {
-        return <Square value={this.state.squares[i]}
-            onClick={() => this.handleClick(i)} />;
+        return (
+            <Square value={this.props.squares[i]}
+                onClick={() => this.props.onClick(i)}
+            />
+        );
     }
 
     render() {
-        /* Check if winner */
-        const winner = calculateWinner(this.state.squares);
-        let status;
-
-        /* Set winner or continue playing */
-        if (winner) {
-            status = 'Winner: ' + winner;
-        } else {
-            /* Text status with user control, on single line if */
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-        }
-
         return (
             <div>
-                <div className="status">{status}</div>
                 <div className="board-row">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
@@ -90,14 +46,63 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+    /* Game contructor to keep the history movements */
+    constructor(props) {
+        super(props);
+        this.state = {
+            history: [{
+                squares: Array(9).fill(null),
+            }],
+            /* This squares array later with info will look like this:
+            [
+                'O', null, 'X',
+                'X', 'X', 'O',
+                'O', null, null,
+            ]
+            */
+            xIsNext: true, /* Turn control */
+        };
+    }
+
+    handleClick(i) {
+        const history = this.state.history;
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+        if (calculateWinner(squares) || squares[i]) {
+            return;
+        }
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        this.setState({
+            history: history.concat([{
+                squares: squares
+            }]),
+            xIsNext: !this.state.xIsNext,
+        });
+    }
+
     render() {
+        const history = this.state.history;
+        const current = history[history.length - 1];
+        const winner = calculateWinner(current.squares);
+
+        let status;
+        if (winner) {
+            status = 'Winner: ' + winner;
+        } else {
+            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+        }
+
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board />
+                    <Board
+                        squares={current.squares}
+                        onClick={(i) => this.handleClick(i)}
+                    />
+
                 </div>
                 <div className="game-info">
-                    <div>{/* status */}</div>
+                    <div>{status}</div>
                     <ol>{/* TODO */}</ol>
                 </div>
             </div>
@@ -111,7 +116,6 @@ ReactDOM.render(
     <Game />,
     document.getElementById('root')
 );
-
 
 /* Function to calculate the winner of the game */
 function calculateWinner(squares) {
